@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-
-import { cn } from '../lib/utils';
+import { cn } from '../../lib/utils';
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
@@ -37,14 +36,68 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  onClick?: () => void;
+  gradientColors?: {
+    hue: number;
+    saturation: number;
+    lightness: number;
+    opacity: number;
+  }[];
+  gradientDirection?: number;
+}
+
+export interface GradientColor {
+  color: string;
+  percentage: number;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  (
+    {
+      className,
+      onClick,
+      gradientColors = [],
+      gradientDirection,
+      variant,
+      size,
+      asChild = false,
+      ...props
+    },
+    ref
+  ) => {
+    const [isClicked, setIsClicked] = React.useState(false);
+
+    const handleClick = () => {
+      setIsClicked(true);
+      onClick && onClick();
+    };
+
+    const handleAnimationEnd = () => {
+      setIsClicked(false);
+    };
+
+    // const buttonClasses = cn(isClicked && styles.clicked);
+
+    const gradientStyle =
+      gradientColors.length > 0
+        ? {
+            backgroundImage: `linear-gradient(${gradientDirection}deg, ${gradientColors
+              .slice(0, 4)
+              .map(
+                ({ hue, saturation, lightness, opacity }) =>
+                  `hsla(${hue}, ${saturation}%, ${lightness}%, ${opacity})`
+              )
+              .join(', ')})`,
+          }
+        : {};
+
     const Comp = asChild ? Slot : 'button';
     return (
       <Comp
+        onClick={handleClick}
+        onAnimationEnd={handleAnimationEnd}
         className={cn(buttonVariants({ variant, size, className }))}
+        style={{ ...gradientStyle }}
         ref={ref}
         {...props}
       />
