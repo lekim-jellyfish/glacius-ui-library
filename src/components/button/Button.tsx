@@ -2,6 +2,9 @@ import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
+import { sizeConfig } from './ButtonSizeConfig';
+import { Size } from '../../types/Size';
+import styles from './styles.module,css';
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
@@ -24,6 +27,14 @@ const buttonVariants = cva(
         lg: 'h-11 rounded-md px-8',
         icon: 'h-10 w-10',
       },
+      radius: {
+        none: 'rounded-none',
+        sm: 'rounded-sm',
+        md: 'rounded-md',
+        lg: 'rounded-lg',
+        xl: 'rounded-xl',
+        full: 'rounded-full',
+      },
     },
     defaultVariants: {
       variant: 'default',
@@ -37,17 +48,20 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   onClick?: () => void;
-  gradientColors?: {
-    hue: number;
-    saturation: number;
-    lightness: number;
-    opacity: number;
-  }[];
+  gradientColors?: GradientColor[];
   gradientDirection?: number;
+  children?: React.ReactNode;
+  leftSection?: React.ReactNode;
+  rightSection?: React.ReactNode;
+  textSize?: Size;
 }
 
 export interface GradientColor {
-  color: string;
+  hue?: number;
+  saturation?: number;
+  lightness?: number;
+  opacity?: number;
+  hex?: string;
   percentage: number;
 }
 
@@ -60,6 +74,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       gradientDirection,
       variant,
       size,
+      rightSection,
+      leftSection,
+      children,
+      radius = 'md',
+      textSize = 'md',
       asChild = false,
       ...props
     },
@@ -76,16 +95,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       setIsClicked(false);
     };
 
-    // const buttonClasses = cn(isClicked && styles.clicked);
-
     const gradientStyle =
       gradientColors.length > 0
         ? {
             backgroundImage: `linear-gradient(${gradientDirection}deg, ${gradientColors
-              .slice(0, 4)
               .map(
-                ({ hue, saturation, lightness, opacity }) =>
-                  `hsla(${hue}, ${saturation}%, ${lightness}%, ${opacity})`
+                ({ hue, saturation, lightness, opacity, hex, percentage }) =>
+                  hex
+                    ? `${hex} ${percentage}%`
+                    : `hsla(${hue}, ${saturation}%, ${lightness}%, ${opacity}) ${percentage}%`
               )
               .join(', ')})`,
           }
@@ -96,11 +114,28 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         onClick={handleClick}
         onAnimationEnd={handleAnimationEnd}
-        className={cn(buttonVariants({ variant, size, className }))}
-        style={{ ...gradientStyle }}
+        style={{ ...gradientStyle, ...props.style }}
+        className={cn(buttonVariants({ variant, size, className, radius }), {
+          [styles.clicked]: isClicked,
+        })}
         ref={ref}
         {...props}
-      />
+      >
+        {' '}
+        {leftSection && leftSection}
+        {children && (
+          <span
+            className={cn(
+              sizeConfig.text[
+                textSize === 'none' || textSize === 'full' ? 'md' : textSize
+              ]
+            )}
+          >
+            {children}
+          </span>
+        )}
+        {rightSection && rightSection}
+      </Comp>
     );
   }
 );
