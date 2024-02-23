@@ -19,8 +19,8 @@ const Divider: React.FC<DividerProps> = React.forwardRef<
       className,
       orientation = 'horizontal',
       decorative = true,
-      color,
-      opacity = 100,
+      color = '#c2c2c2',
+      opacity = 25,
       ...props
     },
     ref
@@ -37,13 +37,13 @@ const Divider: React.FC<DividerProps> = React.forwardRef<
         decorative={decorative}
         orientation={orientation}
         className={cn(
-          'shrink-0 bg-border my-1',
+          'shrink-0 my-1',
           opacityClasses[opacity],
           orientation === 'horizontal' ? 'h-[1px] w-full' : 'h-full w-[1px]',
           className
         )}
         style={{
-          borderColor: color,
+          backgroundColor: color,
         }}
         {...props}
       />
