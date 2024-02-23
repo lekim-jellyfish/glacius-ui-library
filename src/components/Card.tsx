@@ -1,33 +1,76 @@
 import * as React from 'react';
 
 import { cn } from '../lib/utils';
+import { ColorValues } from '../types/Colors';
 
-type CardProps = React.HTMLAttributes<HTMLDivElement>;
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  isExpanded?: boolean;
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+}
 
-const Card = React.forwardRef<HTMLDivElement, CardProps>(
+interface CardContainerProps extends CardProps {
+  isFliped?: boolean;
+  decoration?: 'none' | 'full' | 'top' | 'bottom' | 'left' | 'right' | null;
+  decorationColor?: ColorValues | string;
+  bgColor?: ColorValues | string;
+}
+
+const Card = React.forwardRef<HTMLDivElement, CardContainerProps>(
+  (
+    {
+      className,
+      rounded = 'none',
+      decoration = null,
+      decorationColor = 'black',
+      bgColor = 'white',
+      ...props
+    },
+    ref
+  ) => {
+    const decorationClasses = {
+      none: 'border-none',
+      full: 'border-4',
+      top: 'border-t-4',
+      bottom: 'border-b-4',
+      left: 'border-l-4',
+      right: 'border-r-4',
+    };
+
+    const roundedClasses = {
+      none: 'rounded-none',
+      sm: 'rounded-sm',
+      md: 'rounded-md',
+      lg: 'rounded-lg',
+      xl: 'rounded-xl',
+      full: 'rounded-full',
+    };
+
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'p-4',
+          roundedClasses[rounded],
+          decorationClasses && decorationClasses[decoration || 'none'],
+          className
+        )}
+        style={{ borderColor: decorationColor, backgroundColor: bgColor }}
+        {...props}
+      />
+    );
+  }
+);
+Card.displayName = 'Card';
+
+const CardHeader = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(
-        'rounded-lg border bg-card text-card-foreground shadow-sm',
-        className
-      )}
+      className={cn('flex flex-col space-y-1.5 p-6', className)}
       {...props}
     />
   )
 );
-Card.displayName = 'Card';
-
-const CardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn('flex flex-col space-y-1.5 p-6', className)}
-    {...props}
-  />
-));
 CardHeader.displayName = 'CardHeader';
 
 const CardTitle = React.forwardRef<
@@ -57,26 +100,29 @@ const CardDescription = React.forwardRef<
 ));
 CardDescription.displayName = 'CardDescription';
 
-const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
-));
+const CardContent = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+  )
+);
 CardContent.displayName = 'CardContent';
 
-const CardFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn('flex items-center p-6 pt-0', className)}
-    {...props}
-  />
-));
+const CardFooter = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn('flex items-center p-6 pt-0', className)}
+      {...props}
+    />
+  )
+);
 CardFooter.displayName = 'CardFooter';
 
-const CustomCard = () => <Card>My Custom Card</Card>;
-
-export { Card, CustomCard };
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+};
