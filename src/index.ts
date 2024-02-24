@@ -4,6 +4,7 @@ export { Alert, AlertDescription, AlertTitle } from './components/Alert';
 export {
   Card,
   CardHeader,
+  CardTitle,
   CardDescription,
   CardContent,
   CardFooter,

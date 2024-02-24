@@ -17,6 +17,12 @@
     "outDir": "dist",
     "declaration": true,
     "declarationMap": true,
+
+    /* Paths */
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["./src"]
 }
